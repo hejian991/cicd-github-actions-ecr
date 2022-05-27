@@ -9,9 +9,11 @@
 
 on:
   push:
-    branches: [ master ]
+    branches: [ dev ]
   pull_request:
-    branches: [ master ]
+    branches: [ dev ]
+    types:
+      - closed
 
 name: Node Project `my-app` CI on ECR
 
@@ -29,7 +31,7 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}
+        aws-region: ap-northeast-1
 
     - name: Login to Amazon ECR
       id: login-ecr
@@ -38,9 +40,9 @@ jobs:
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
       env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: my-app-repo
-        IMAGE_TAG: latest
+        ECR_REGISTRY: '${{ steps.login-ecr.outputs.registry }}'
+        ECR_REPOSITORY: 'test-cicd-github-actions-ecr'
+        IMAGE_TAG: "dev-${{ steps.slug.outputs.sha8 }}"
       run: |
         # Build a docker container and push it to ECR 
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
